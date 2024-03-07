@@ -1,6 +1,6 @@
 library(TMB)
 library(tidyverse)
-setwd(here::here('R'))
+theme_set(afscassess::theme_report())
 compile("nork.cpp")
 
 # source data inputs from 2022 assessment
@@ -32,8 +32,7 @@ data = list(rec_age = rec_age,
             fish_size_iss = fish_size_iss,
             fish_size_wt = 0.5,
             age_error = age_error,
-            size_age = size_age,
-            sigmaR = 1.5) # not currently used)
+            size_age = size_age) # not currently used)
 str(data) # check yo dims!!
 pars = list(log_a50 = log_a50,
             delta = delta,
@@ -43,7 +42,8 @@ pars = list(log_a50 = log_a50,
             log_mean_R = log_mean_R,
             log_Rt =  log_Rt,
             init_logRt = init_logRt,
-            log_q = log_q)
+            log_q = log_q,
+            sigmaR = 1.5)
  str(pars)           
 dyn.load("nork")
 obj = TMB::MakeADFun(data = data, 
@@ -51,20 +51,37 @@ obj = TMB::MakeADFun(data = data,
                      DLL = "nork",
                      map = list(log_a50 = rep(factor(NA), 2),
                                 delta = rep(factor(NA), 2),
-                                # log_mean_F = factor(NA),
+                                log_mean_F = factor(NA),
                                 log_Ft = rep(factor(NA), T),
-                                log_M = factor(NA),
+                                # log_M = factor(NA),
                                 log_mean_R = factor(NA),
                                 log_Rt = rep(factor(NA), T),
                                 init_logRt = rep(factor(NA), 48),
-                                log_q = factor(NA)))
+                                log_q = factor(NA),
+                                sigmaR = factor(NA)))
 # Optimize the model
 fit = nlminb(start = obj$par, objective = obj$fn, gradient = obj$gr)
-sd = sdreport(obj)
-rep = obj$report()
 
+sd = sdreport(obj)
+rep = obj$report(par = obj$env$last.par.best)
+try_improve = tryCatch(expr =
+                         for(i in 1:2) {
+                           g = as.numeric(obj$gr(fit$par))
+                           h = optimHess(fit$par, fn = obj$fn, gr = obj$gr)
+                           fit$par = fit$par - solve(h,g)
+                           fit$objective = obj$fn(fit$par)
+                         }
+                       , error = function(e){e}, warning = function(w){w})
+
+if(inherits(try_improve, "error") | inherits(try_improve, "warning")) {
+  cat("didn't converge!!!\n")
+  }
+  
 rep$age_likelihood
 rep$srv_age_likelihood
+rep$srv_likelihood
+rep$length_likelihood
+rep$catch_likelihood
 
 data.frame(years = srv_yrs,
 obs = srv_obs,
@@ -74,6 +91,69 @@ geom_point() +
 geom_line(aes(y=pred)) +
 expand_limits(y = 0)
 
+ages = rec_age:(nrow(fish_age_obs)+1)
+
+data.frame(year = years,
+          tot = rep$totbio,
+          ssb = rep$ssb) %>% 
+ggplot(aes(year, tot)) +
+geom_point() + 
+geom_line(aes(y=ssb)) +
+expand_limits(y = 0) + 
+geom_hline(yintercept = rep$Bzero * 0.4, lty = 3)
 
 
-setwd(here::here())
+rep$fish_age_pred %>% 
+        data.frame() %>% 
+        mutate(age = ages) %>% 
+        pivot_longer(-age) %>% 
+        mutate(year = as.numeric(gsub("X", "", name)),
+        type = 'pred')  %>% 
+        bind_rows(fish_age_obs %>% 
+        data.frame() %>% 
+        mutate(age = ages) %>% 
+        pivot_longer(-age) %>% 
+        mutate(year = as.numeric(gsub("X", "", name)),
+        type = 'obs')) %>% 
+        ggplot(aes(age, value, color = type)) +
+        geom_col(data = . %>% filter(type == 'obs'), color = 'lightgray', fill = 'lightgray') +
+        geom_point(data = . %>% filter(type == 'pred')) +
+        facet_wrap(~year) 
+
+# recruits
+barplot(rep$Nat[1,])
+
+ rep$srv_age_pred %>% 
+        data.frame() %>% 
+        mutate(age = ages) %>% 
+        pivot_longer(-age) %>% 
+        mutate(year = as.numeric(gsub("X", "", name)),
+        type = 'pred')  %>% 
+        bind_rows(srv_age_obs %>% 
+        data.frame() %>% 
+        mutate(age = ages) %>% 
+        pivot_longer(-age) %>% 
+        mutate(year = as.numeric(gsub("X", "", name)),
+        type = 'obs')) %>% 
+        ggplot(aes(age, value, color = type)) +
+        geom_col(data = . %>% filter(type == 'obs'), color = 'lightgray', fill = 'lightgray') +
+        geom_point(data = . %>% filter(type == 'pred')) +
+        facet_wrap(~year) 
+
+rep$fish_size_pred %>% 
+        data.frame() %>% 
+        mutate(length = length_bins) %>% 
+        pivot_longer(-length) %>% 
+        mutate(year = as.numeric(gsub("X", "", name)),
+        type = 'pred')  %>% 
+        bind_rows(fish_size_obs %>% 
+        data.frame() %>% 
+        mutate(length = length_bins) %>% 
+        pivot_longer(-length) %>% 
+        mutate(year = as.numeric(gsub("X", "", name)),
+        type = 'obs')) %>% 
+        ggplot(aes(length, value, color = type)) +
+        geom_col(data = . %>% filter(type == 'obs'), color = 'lightgray', fill = 'lightgray') +
+        geom_point(data = . %>% filter(type == 'pred')) +
+        facet_wrap(~year, scales = 'free_y') 
+

@@ -44,8 +44,6 @@ Type objective_function<Type>::operator() ()
   DATA_MATRIX(age_error);
   DATA_MATRIX(size_age);
 
-  // DATA_SCALAR(sigmaR);
-
   // parameters -----------------------------
   PARAMETER_VECTOR(log_a50);    // age at 50% selectivity for commercial fishery & survey
   PARAMETER_VECTOR(delta);      // spread of selectivity for commercial fishery & survey
@@ -56,7 +54,8 @@ Type objective_function<Type>::operator() ()
   PARAMETER_VECTOR(log_Rt);     // log recruitment at time t dim(T)
   PARAMETER_VECTOR(init_logRt); // log recruitment at time t dim(A-2)
   PARAMETER(log_q);             // survey catchability
-
+  PARAMETER(sigmaR);            // recruitment error
+  
 // setup -----------------------------------------------------------
     int A = age_error.rows();   // total ages - modeled in plus group
     int T = years.size();
@@ -66,7 +65,7 @@ Type objective_function<Type>::operator() ()
       int indC = 0;             // fishing fleet slx index
     Type spawn_adj = pow(exp(-M), ((spawn_mo - 1) / 12));   // adjustment for spawning month
     Type q = exp(log_q);
-    // Type sigmaR2 = pow(sigmaR, 2);
+    Type sigmaR2 = pow(sigmaR, 2);
     Type nll = 0.0;             // negative log likelihood
 
 // containers -----------------------------------------------------
@@ -104,8 +103,8 @@ Type objective_function<Type>::operator() ()
     matrix<Type> fish_age_pred(fish_age_obs.rows(), fish_age_obs.cols());   // predicted fishery age composition
     fish_age_pred.setZero();
     matrix<Type> fish_size_pred(fish_size_obs.rows(), fish_size_obs.cols());  // predicted fishery size composition
-    // Type rec_pen = 0.0; // recruitment penalty
-    // Type Ft_pen = 0.0;  // F-dev penalty
+    Type Rt_pen = 0.0; // recruitment penalty
+    Type Ft_pen = 0.0;  // F-dev penalty
 // run functions ----------------------------------------------------
     get_selectivity(slx, a50, delta, rec_age);
     get_survival(Fat, Zat, Sat, Ft, log_mean_F, log_Ft, slx, indC, M);
@@ -127,18 +126,18 @@ Type objective_function<Type>::operator() ()
 
 // penalties ---------------------------------------------
   // Recruitment penalty
-  // for(int t=0; t<init_logRt.size(); ++t){
-  //   rec_pen += square(init_logRt(t) + sigmaR2 / 2.) / (2.* sigmaR2);
-  //   }
-  // for(int t=0; t<log_Rt.size(); ++t){
-  //   rec_pen += square(log_Rt(t) + sigmaR2 / 2.) / (2.* sigmaR2);
-  //   }
-  //   rec_pen += (init_logRt.size() + log_Rt.size()) * log(sigmaR);
+  for(int t=0; t<init_logRt.size(); ++t){
+    Rt_pen += square(init_logRt(t) + sigmaR2 / 2.) / (2.* sigmaR2);
+    }
+  for(int t=0; t<log_Rt.size(); ++t){
+    Rt_pen += square(log_Rt(t) + sigmaR2 / 2.) / (2.* sigmaR2);
+    }
+    Rt_pen += (init_logRt.size() + log_Rt.size()) * log(sigmaR);
 
   // F-dev penalty
-  // Ft_pen = square(log_Ft).sum();
+  Ft_pen = square(log_Ft).sum();
 
-  // nll = nll + rec_pen + Ft_pen;
+  nll = nll + Rt_pen + Ft_pen;
 
 // report ----------------------------------------------
     REPORT(Bzero);
