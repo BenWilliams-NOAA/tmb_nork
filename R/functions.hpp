@@ -1,12 +1,23 @@
+/*
+  t,...,T - time steps
+  a,...,A - age classes
+  l,...,L - length bins
+  g,...,G - fleets
+  
+*/
+
+template <class Type>
+Type square(Type x){return x*x;}
+
 // base selectivity function
 template<class Type>
-Type sel(int age, Type a50, Type delta, Type first_age) {
+Type sel(int age, Type a50, Type delta, int first_age) {
      return 1./(1. + exp(-log(19) * (age + first_age - a50) / delta));
   }
 
 // run selectivity function for all ages and fleets
 template <class Type>
-void get_selectivity(matrix<Type>& slx, vector<Type>& a50, vector<Type>& delta, Type first_age) {
+void get_selectivity(matrix<Type>& slx, vector<Type>& a50, vector<Type>& delta, int first_age) {
   int A = slx.rows(); // number of age classes
   int G = slx.cols(); // number of fleets
   for(int a = 0; a < A; a++){
@@ -234,3 +245,4 @@ void get_biomass(const matrix<Type>& Nat, const vector<Type>& waa, const vector<
         ssb(t) = (Nat.col(t).array() * wt_mature).sum();
     }
 }
+

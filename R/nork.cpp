@@ -9,7 +9,7 @@ template<class Type>
 Type objective_function<Type>::operator() ()
 {
   // inputs --------------------------------
-  DATA_VECTOR(rec_age);         // recruitment age - different from 'usual' since rockfish age error extends beyond plus group
+  DATA_INTEGER(rec_age);         // recruitment age - different from 'usual' since rockfish age error extends beyond plus group
   DATA_VECTOR(years);           // years, dim = T
   DATA_VECTOR(length_bins);     // lengths
   DATA_SCALAR(spawn_mo);
@@ -44,6 +44,8 @@ Type objective_function<Type>::operator() ()
   DATA_MATRIX(age_error);
   DATA_MATRIX(size_age);
 
+  // DATA_SCALAR(sigmaR);
+
   // parameters -----------------------------
   PARAMETER_VECTOR(log_a50);    // age at 50% selectivity for commercial fishery & survey
   PARAMETER_VECTOR(delta);      // spread of selectivity for commercial fishery & survey
@@ -64,7 +66,7 @@ Type objective_function<Type>::operator() ()
       int indC = 0;             // fishing fleet slx index
     Type spawn_adj = pow(exp(-M), ((spawn_mo - 1) / 12));   // adjustment for spawning month
     Type q = exp(log_q);
-
+    // Type sigmaR2 = pow(sigmaR, 2);
     Type nll = 0.0;             // negative log likelihood
 
 // containers -----------------------------------------------------
@@ -86,7 +88,8 @@ Type objective_function<Type>::operator() ()
     matrix<Type> srv_age_pred(srv_age_obs.rows(), srv_age_obs.cols());  // predicted survey age composition
     matrix<Type> fish_age_pred(fish_age_obs.rows(), fish_age_obs.cols());   // predicted fishery age composition
     matrix<Type> fish_size_pred(fish_size_obs.rows(), fish_size_obs.cols());  // predicted fishery size composition
-
+    // Type rec_pen = 0.0; // recruitment penalty
+    // Type Ft_pen = 0.0;  // F-dev penalty
 // run functions ----------------------------------------------------
     get_selectivity(slx, a50, delta, rec_age);
     get_survival(Fat, Zat, Sat, Ft, log_mean_F, log_Ft, slx, indC, M);
@@ -105,6 +108,21 @@ Type objective_function<Type>::operator() ()
     Type srv_age_likelihood = comp_like(srv_age_wt, srv_age_obs, srv_age_iss, srv_age_pred);
     Type length_likelihood = comp_like(fish_size_wt, fish_size_obs, fish_size_iss, fish_size_pred);
     nll = catch_likelihood + srv_likelihood + age_likelihood + srv_age_likelihood + length_likelihood;
+
+// penalties ---------------------------------------------
+  // Recruitment penalty
+  // for(int t=0; t<init_logRt.size(); ++t){
+  //   rec_pen += square(init_logRt(t) + sigmaR2 / 2.) / (2.* sigmaR2);
+  //   }
+  // for(int t=0; t<log_Rt.size(); ++t){
+  //   rec_pen += square(log_Rt(t) + sigmaR2 / 2.) / (2.* sigmaR2);
+  //   }
+  //   rec_pen += (init_logRt.size() + log_Rt.size()) * log(sigmaR);
+
+  // F-dev penalty
+  // Ft_pen = square(log_Ft).sum();
+
+  // nll = nll + rec_pen + Ft_pen;
 
 // report ----------------------------------------------
     REPORT(Bzero);
