@@ -71,22 +71,38 @@ Type objective_function<Type>::operator() ()
 
 // containers -----------------------------------------------------
     matrix<Type> slx(A,G);          // selectivity for all fleets
+    slx.setZero();
     matrix<Type> Fat(A,T);          // F for all ages and years
+    Fat.setZero();
     matrix<Type> Zat(A,T);          // Z for all ages and years
+    Zat.setZero();
     matrix<Type> Sat(A,T);          // S for all ages and years
+    Sat.setZero();
     vector<Type> Ft(T);             // F for all years
+    Ft.setZero();
     vector<Type> initNat(A);        // initial numbers at age
+    initNat.setZero();
     matrix<Type> Nat(A,T);          // numbers at age
+    Nat.setZero();
     vector<Type> totbio(T);         // total biomass
+    totbio.setZero();
     vector<Type> ssb(T);            // spawning stock biomass
+    ssb.setZero();
     Type Bzero = 0.0;               // unfished biomass
     matrix<Type> Cat(A,T);          // catch at age
+    Cat.setZero();
     vector<Type> catch_pred(T);     // predicted catch
+    catch_pred.setZero();
     vector<Type> pred0(T);          // first portion of predicted catch
-    vector<Type> pred1(T);          // 2nd portion of predicted catch       
+    pred0.setZero();
+    vector<Type> pred1(T);          // 2nd portion of predicted catch     
+    pred1.setZero();  
     vector<Type> srv_pred = srv_obs.size(); // predicted survey biomass
+    srv_pred.setZero();
     matrix<Type> srv_age_pred(srv_age_obs.rows(), srv_age_obs.cols());  // predicted survey age composition
+    srv_age_pred.setZero();
     matrix<Type> fish_age_pred(fish_age_obs.rows(), fish_age_obs.cols());   // predicted fishery age composition
+    fish_age_pred.setZero();
     matrix<Type> fish_size_pred(fish_size_obs.rows(), fish_size_obs.cols());  // predicted fishery size composition
     // Type rec_pen = 0.0; // recruitment penalty
     // Type Ft_pen = 0.0;  // F-dev penalty
