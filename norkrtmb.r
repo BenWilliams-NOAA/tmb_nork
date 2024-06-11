@@ -268,6 +268,7 @@ ncol = 44, byrow = TRUE)
 # inputs ------------------
 data <- list(ages = ages,
             years = years,
+            length_bins = 15:45,
             waa = waa,
             wt_mature = maa * waa,
             spawn_mo = 4,
@@ -284,7 +285,15 @@ data <- list(ages = ages,
             srv_age_obs = srv_age_obs,
             srv_age_ind = srv_age_ind,
             srv_age_iss = srv_age_iss,
-            srv_age_wt = 0.5)
+            srv_age_wt = 0.5,
+            fish_size_obs = fish_size_obs,
+            fish_size_ind = fish_size_ind,
+            fish_size_iss = fish_size_iss,
+            fish_size_wt = 0.5,
+            age_error = age_error,
+            size_age = size_age,
+            wt_fmort_reg = 0.1,
+            sigmaR = 1.5)
 
 # parameters ----------------
 pars <- list(log_M = log(0.05949983),
@@ -343,6 +352,8 @@ f <- function(pars) {
     T = length(catch_obs)
     Tfa = sum(fish_age_ind)
     Tsa = sum(srv_age_ind)
+    Tfs = sum(fish_size_ind)
+    L = length(length_bins)
     cwt = unique(catch_wt) # time blocks for catch weighting
     g = 0.00001 # small number
     n_ssb = T + A
@@ -356,7 +367,9 @@ f <- function(pars) {
     srv_pred = rep(0, length(srv_obs))
     fish_age_pred = matrix(0, A1, Tfa)
     srv_age_pred = matrix(0, A1, Tsa)
-    ssb = rep(0, n_ssb)
+    fish_size_pred = matrix(0, L, Tfs)
+    ssb = rep(0, T)
+    f_regularity = 0.0
 
   # analysis ----------
     # selectivity 
@@ -389,21 +402,23 @@ f <- function(pars) {
     Bzero = sum(initNat * wt_mature * spawn_adj)
 
     ## numbers at age
-    Nat[1,1] = exp(log_mean_R + log_Rt[1])
+    # populate first column
     for(a in 2:A-1) {
-      Nat[a,1] = exp(log_mean_R -  (a-1) * M + log_Rt[a])
+      Nat[a,1] = exp(log_mean_R - (a-1) * M + log_Rt[a])
     }
-    # flag - 
+
     Nat[A,1] = exp(log_mean_R - (A-1) * M) / (1 - exp(-M))
-    
-    for(t in 2:T) {
+
+    # populate first row
+    for(t in 1:T) {
       Nat[1,t] = exp(log_mean_R + log_Rt[t+A-ages[1]])
     }
+
     for(t in 2:T) {
         for(a in 2:A) {
             Nat[a,t] = Nat[a-1,t-1] * Sat[a-1,t-1]
         }
-        Nat[A,t] = Nat[A,t] * Sat[A,t] + Nat[A,t=1] * Sat[A,t-1]  
+        Nat[A,t] = Nat[A,t] + Nat[A,t-1] * Sat[A,t-1]  
     }
 
     # ssb
@@ -456,6 +471,15 @@ f <- function(pars) {
       }
     }
 
+ # fishery size comp
+    icomp = 1
+    for(t in 1:T) {
+      if(fish_size_ind[t] == 1) {
+        fish_size_pred[,icomp] = as.numeric(colSums((Cat[,t] / sum(Cat[,t])) * size_age))
+        # fish_age_lk[icomp] = sum(fish_age_iss[icomp] * ((fish_age_obs[,icomp] + g) * log((fish_age_pred[,icomp] + g / (fish_age_obs[,icomp] + g)))))
+        icomp = icomp + 1
+      }
+    }
     # likelihoods --------------------
     # catch 
     ssq = rep(0, T)
@@ -480,14 +504,24 @@ f <- function(pars) {
             srv_age_lk[t] = srv_age_lk[t] - sum(srv_age_iss[t] * (srv_age_obs[,t] + g) * log(srv_age_pred[,t] + g))
         # }
     }
-
+    
+    # fishery size comp 
+    fish_size_lk = rep(0, Tfs)
+    for(t in 1:Tfs) {
+        for(l in 1:L) {
+            fish_size_lk[t] = fish_size_lk[t] - sum(fish_size_iss[t] * (fish_size_obs[l,t] + g) * log(fish_size_pred[l,t] + g))
+        }
+    }
     
     ssqcatch = sum(ssq)
     srv_like = sum(like) * srv_wt
     fish_age_like = sum(fish_age_lk) * fish_age_wt
     srv_age_like = sum(srv_age_lk) * srv_age_wt
+    fish_size_like = sum(fish_size_lk) * fish_size_wt
+    rec_like = sum(log_Rt^2) / (2 * sigmaR^2) + (length(log_Rt) * log(sigmaR))
+    f_regularity = wt_fmort_reg * sum(log_Ft^2)
 
-    nll = ssqcatch + srv_like + fish_age_like + srv_age_like
+    nll = ssqcatch + srv_like + fish_age_like + srv_age_like + fish_size_like + rec_like + f_regularity 
 
     # reports -------------------
     RTMB::REPORT(M)
@@ -500,6 +534,10 @@ f <- function(pars) {
     RTMB::REPORT(log_Rt)
     RTMB::REPORT(log_mean_F)
     RTMB::REPORT(log_Ft)   
+    RTMB::REPORT(Fat)
+    RTMB::REPORT(Zat)    
+    RTMB::REPORT(Sat)
+    RTMB::REPORT(Cat)    
     RTMB::REPORT(Nat)
     RTMB::REPORT(slx)
     RTMB::REPORT(catch_pred)
@@ -507,7 +545,7 @@ f <- function(pars) {
     RTMB::REPORT(dum)
     RTMB::REPORT(fish_age_pred)
     RTMB::REPORT(srv_age_pred)
-
+    RTMB::REPORT(fish_size_pred)
     RTMB::REPORT(ssqcatch)
     RTMB::REPORT(srv_like)
     RTMB::REPORT(fish_age_like)
@@ -516,24 +554,58 @@ f <- function(pars) {
     return(nll)
 }
 
-  obj <- RTMB::MakeADFun(f, pars, hessian = TRUE)
-                            map = list(log_M = factor(NA),
-                                        log_a50C = factor(NA),
-                                        deltaC = factor(NA),
-                                        log_a50S = factor(NA),
-                                        deltaS = factor(NA),
-                                        log_q = factor(NA),
-                                        log_mean_R = factor(NA),
-                                        log_Rt = factor(rep(NA, length(pars$log_Rt))),
-                                        log_mean_F = factor(NA),
-                                        log_Ft = factor(rep(NA, length(pars$log_Ft))))                 
+map = list(log_M = factor(NA),
+          log_a50C = factor(NA),
+          deltaC = factor(NA),
+          log_a50S = factor(NA),
+          deltaS = factor(NA),
+          log_q = factor(NA),
+          log_mean_R = factor(NA),
+          log_Rt = factor(rep(NA, 110)),
+          log_mean_F = factor(NA),
+          log_Ft = factor(rep(NA, 62)))
+          # )
+
+  
+  obj <- RTMB::MakeADFun(f, pars, hessian = TRUE,
+                            map = map)                 
 
   fit <- nlminb(obj$par, obj$fn, obj$gr)
   sd <- RTMB::sdreport(obj)
   report <- obj$report(obj$env$last.par.best)
 
 report$catch_pred
-report$srv_pred
+report$Nat
+report$Cat
+plot(years, catch_obs, pch = 19)
+lines(years, report$catch_pred)
+plot(srv_yrs, srv_obs, pch=19)
+lines(srv_yrs, report$srv_pred)
+
+as.data.frame(srv_age_obs) %>% 
+mutate(age = ages,
+      type = 'obs') %>% 
+pivot_longer(-c(age, type))  %>% 
+mutate(year = as.numeric(gsub('V', '', name))) %>% 
+ggplot(aes(age, value)) + 
+geom_col() +
+geom_line(data = df2) +
+facet_wrap(~year, ncol=1)
+
+
+as.data.frame(report$srv_age_pred)  %>% 
+mutate(age = ages,
+      type = 'pred') %>% 
+pivot_longer(-c(age, type)) %>% 
+mutate(year = as.numeric(gsub('V', '', name))) -> df2
+
+ggplot(aes(age, name, color = type)) + 
+geom_point() +
+facet_wrap(~name, ncol=1, scales = 'free_y')
+
+data.frame(obs = srv_age_obs,
+            pre = report$srv_age_pred)
+
 
 tt = as.data.frame(report$srv_age_pred)
 names(tt) <- srv_age_yrs 
@@ -544,3 +616,18 @@ ggplot(aes(age, value, group = name)) +
 geom_line() +
 geom_point() +
 facet_wrap(~name, ncol=1, scales = 'free_y')
+
+# lengths 
+tt = as.data.frame(report$fish_size_pred)
+names(tt) <- srv_size_yrs 
+tt %>% 
+mutate(length = length_bins) %>% 
+pivot_longer(-length) %>% 
+ggplot(aes(length, value, group = name)) + 
+geom_line() +
+geom_point() +
+facet_wrap(~name, ncol=1, scales = 'free_y')
+
+report$Nat
+report$log_Ft
+
