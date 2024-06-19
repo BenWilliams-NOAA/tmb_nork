@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "*.Rmd": "rmd",
+        "*.tpl": "cpp",
+        "*.dat": "cpp",
+        "cmath": "cpp",
+        "complex": "cpp",
+        "vector": "cpp",
+        "random": "cpp",
+        "optional": "cpp",
+        "system_error": "cpp"
+    }
+}
