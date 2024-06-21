@@ -1,9 +1,13 @@
 # attenpt at setting up northern rockfish model using RTMB
-install.packages('RTMB', repos = c('https://kaskr.r-universe.dev', 'https://cloud.r-project.org'))
+remotes::install_github("https://github.com/kaskr/RTMB", subdir="RTMB")
+library(RTMB)
+library(tidyverse)
 library(Matrix)
 library(tmbstan)
 library(shinystan)
 
+compiler::enableJIT(0)
+source(here::here('data', 'nork_data_2022.r'))
 # inputs ------------------
 data <- list(ages = ages,
              years = years,
@@ -37,7 +41,7 @@ data <- list(ages = ages,
              mean_q = 1,
              sd_q = 0.45,
              mean_sigmaR = 1.5,
-             sd_sigmaR = 0.1,
+             sd_sigmaR = 0.01,
              proj_rec_yrs = proj_rec_yrs,
              yield_ratio = yield_ratio)
 
@@ -90,6 +94,7 @@ pars <- list(log_M = log(0.05949983),
 
 # model ----
 f <- function(pars) {
+  
   RTMB::getAll(pars, data)
   # setup -------------
   M = exp(log_M)
@@ -125,15 +130,13 @@ f <- function(pars) {
   fish_size_pred = matrix(0, L, Tfs)
   spawn_bio = tot_bio = rep(0, T)
   N_spr = sb_spr = matrix(1, A, 4)
-  # N_proj = Cat_proj = matrix(0, A, Tproj)
-  # spawn_bio_proj = tot_bio_proj = rep(0, Tproj)
-  
+
   # priors -----------------
-  nll_M = nll_q = 0.0
+  nll_M = nll_q = nll_sigmaR = 0.0
   nll_M = dnorm(M, mean_M, sd_M, TRUE)
   nll_q = dnorm(q, mean_q, sd_q, TRUE)
   nll_sigmaR = dnorm(sigmaR, mean_sigmaR, sd_sigmaR, TRUE)
-  
+   
   # analysis ----------
   # selectivity 
   sel <- function(a, a50, delta) {
@@ -310,13 +313,13 @@ f <- function(pars) {
   spawn_bio_proj[1] = sum(N_proj[,1] * exp(-yield_ratio * Fabc_tot_proj - M)^spawn_fract * wt_mature)
   
   # tier check
-  # if((spawn_bio_proj[1] / B40) > 1) {
-  #   F40_proj = F40
-  #   F35_proj = F35
-  #  } else {
-  #   F40_proj[,1] = F40_proj * (spawn_bio_proj[1] / B402 - 0.05) / 0.95
-  #   F35_proj[,1] = F35_proj * (spawn_bio_proj[1] / B402 - 0.05) / 0.95
-  #  }
+  if((spawn_bio_proj[1] / B40) > 1) {
+    F40_proj = F40
+    F35_proj = F35
+   } else {
+    F40_proj[,1] = F40_proj * (spawn_bio_proj[1] / B402 - 0.05) / 0.95
+    F35_proj[,1] = F35_proj * (spawn_bio_proj[1] / B402 - 0.05) / 0.95
+   }
   Fabc_tot_proj = F40_proj * slx[,1]
   Fofl_tot_proj = F35_proj * slx[,1]
   Zabc_proj = Fabc_tot_proj + M
@@ -334,18 +337,18 @@ f <- function(pars) {
   }
   
   #   # tier check
-  #   if(spawn_bio_proj[t] / B40 > 1) {
-  #     F40_proj = F40
-  #     F35_proj = F35
-  #   } else {
-  #     Fabc_proj[,t] = F40_proj * (spawn_bio_proj[t] / B40 - 0.05) / 0.95 
-  #     Fofl_proj[,t] = F35_proj * (spawn_bio_proj[t] / B40 - 0.05) / 0.95 
-  #   }
-  #   Fabc_tot_proj[,t] = F40_proj * slx[,1]
-  #   Fofl_tot_proj[,t] = F35_proj * slx[,1]
-  #   Zabc_proj[,t] = Fabc_tot_proj[,t] + M
-  #   Zofl_proj[,t] = Fofl_tot_proj[,t] + M
-  #   S_proj[,t] = exp(-Zabc_proj[,t])
+    if(spawn_bio_proj[t] / B40 > 1) {
+      F40_proj = F40
+      F35_proj = F35
+    } else {
+      Fabc_proj[,t] = F40_proj * (spawn_bio_proj[t] / B40 - 0.05) / 0.95
+      Fofl_proj[,t] = F35_proj * (spawn_bio_proj[t] / B40 - 0.05) / 0.95
+    }
+    Fabc_tot_proj[,t] = F40_proj * slx[,1]
+    Fofl_tot_proj[,t] = F35_proj * slx[,1]
+    Zabc_proj[,t] = Fabc_tot_proj[,t] + M
+    Zofl_proj[,t] = Fofl_tot_proj[,t] + M
+    S_proj[,t] = exp(-Zabc_proj[,t])
   #   
   # }
   # 
@@ -418,6 +421,7 @@ f <- function(pars) {
   RTMB::REPORT(a50S)
   RTMB::REPORT(deltaS)
   RTMB::REPORT(q)
+  RTMB::REPORT(sigmaR)
   RTMB::REPORT(log_mean_R)
   RTMB::REPORT(log_Rt)
   RTMB::REPORT(log_mean_F)
@@ -455,8 +459,6 @@ f <- function(pars) {
   RTMB::REPORT(like_fish_size)
   RTMB::REPORT(like_rec)
   RTMB::REPORT(f_regularity)
-  RTMB::REPORT(nll_M)
-  RTMB::REPORT(nll_q)
   RTMB::REPORT(sprpen)
   RTMB::REPORT(nll_q)
   RTMB::REPORT(nll_M)
@@ -481,10 +483,9 @@ map = list(log_M = factor(NA),
            log_F40 = factor(NA),
            log_F50 = factor(NA),
            sigmaR = factor(NA))
-# )
 
 # run ----
-f(pars)
+
 obj <- RTMB::MakeADFun(f, pars, hessian = TRUE,
                        map = map)                 
 
@@ -492,9 +493,10 @@ fit <- nlminb(obj$par, obj$fn, obj$gr)
 sd <- RTMB::sdreport(obj)
 report <- obj$report(obj$env$last.par.best)
 report
-obj1 <- RTMB::MakeADFun(f, pars, hessian = TRUE) # ,
-# map = list(#og_M = factor(NA),
-#            log_q = factor(NA)))             
+
+obj1 <- RTMB::MakeADFun(f, pars, hessian = TRUE,
+                        map = list(sigmaR = factor(NA)))
+    
 fit1 <- nlminb(obj1$par, obj1$fn, obj1$gr)
 sd1 <- RTMB::sdreport(obj1)
 report1 <- obj1$report(obj1$env$last.par.best)
@@ -527,7 +529,8 @@ report1$spawn_bio
 report1$tot_bio
 report1$M
 report1$q
-report1$Bzero * 0.4
+report1$sigmaR
+report1$log_mean_R
 report1$B40
 
 sv = c(126633, 138550, 142971, 142962, 138780, 138752, 138889, 139249, 137494, 131288, 120554, 107594, 96254.4, 88136.6, 79734.1 )
