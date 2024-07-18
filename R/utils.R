@@ -54,7 +54,7 @@ proj_bio <- function(report, obj=NULL, post=NULL, reps = 500) {
   
   # storage
   if(!is.null(post)) {
-    surv = get_survival(post=post, obj=obj1, reps = reps)
+    surv = get_survival(post=post, obj=obj, reps = reps)
     Tproj = 15
     N = Fabc_tot = Fofl_tot = replicate(reps, matrix(0, A, Tproj), simplify = FALSE)
     F40_proj = F35_proj = spawn_bio = tot_bio = replicate(reps, rep(0, Tproj), simplify = FALSE)
