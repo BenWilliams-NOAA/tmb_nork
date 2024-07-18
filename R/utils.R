@@ -189,30 +189,30 @@ proj_bio <- function(report, obj=NULL, post=NULL, reps = 500) {
 
 single_likelihood <- function(param_name, param_values, obj, fit) {
   n <- length(param_values)
-  log_likelihoods <- numeric(n)
+  log_like <- numeric(n)
   
   for (i in 1:n) {
     params <- fit$par
     params[param_name] <- param_values[i]
-    log_likelihoods[i] <- obj$fn(params)
+    log_like[i] <- obj$fn(params)
   }
   
-  return(log_likelihoods)
+  return(log_like)
 }
 
 
 # Function to profile the likelihood for multiple parameters
-profile_likelihood <- function(param_names, param_ranges, obj, fit) {
+multi_likelihood <- function(param_names, param_ranges, obj, fit) {
   grid <- expand.grid(param_ranges)
-  log_likelihoods <- numeric(nrow(grid))
+  log_like <- numeric(nrow(grid))
   
   for (i in 1:nrow(grid)) {
     params <- fit$par
     for (j in 1:length(param_names)) {
       params[param_names[j]] <- grid[i, j]
     }
-    log_likelihoods[i] <- obj$fn(params)
+    log_like[i] <- obj$fn(params)
   }
   
-  return(data.frame(grid, log_likelihood=log_likelihoods))
+  return(data.frame(grid, log_like=log_like))
 }

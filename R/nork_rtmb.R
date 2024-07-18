@@ -228,7 +228,8 @@ proj_bio(report_2)
 
 # compare to admb model
 plot(years, bio$recruits)
-lines(years, report_2$Nat[1,])
+lines(years, report_1$Nat[1,])
+lines(years, report_2$Nat[1,], col=3)
 
 plot(years, bio$sp_biom, ylim = c(10000, 85000))
 lines(years, report_1$spawn_bio)
@@ -251,14 +252,271 @@ report_1$spawn_bio - report_2$spawn_bio
 report_1$tot_bio - report_2$tot_bio
 report_1$Ft - report_2$Ft
 
+
+# don't really like older catch values as they are just expansions from pop catches
+# remove anything before 1979 - to match what we do with duskies
+
+years = 1979:2022
+catch_obs = c(670, 810, 1477,
+              3920, 3618, 1002, 185, 248, 483, 1107, 1527, 1716, 4528, 7770 ,4820.3,
+              5966.19, 5635.4, 3340.31, 2935.01, 3055.45, 5408.89, 3333.47, 3132.77, 3339.25, 5256.072,
+              4810.786, 4521.671, 4957.706, 4186.649, 4052.09, 3951.653, 3902.3631, 3443.9287, 5077.0064, 4879.2848, 4278.2316, 3944.5536,
+              3433.9938, 1835.0952, 2358.7904, 2748.1593, 2384.9172, 2376.4923, 1875.7379)
+
+srv_ind = ifelse(years %in% srv_yrs, 1, 0)
+fish_age_ind = ifelse(years %in% fish_age_yrs, 1, 0)
+srv_age_ind = ifelse(years %in% srv_age_yrs, 1, 0)
+fish_size_ind = ifelse(years %in% fish_size_yrs, 1, 0)
+
+data <- list(ages = ages,
+             years = years,
+             length_bins = 15:45,
+             waa = waa,
+             wt_mature = maa * waa / 2,
+             spawn_mo = 5,
+             catch_obs = catch_obs,
+             catch_wt = rep(50, length(years)),
+             srv_obs = srv_obs,
+             srv_ind = srv_ind,
+             srv_sd = srv_sd,
+             srv_wt = 0.25,
+             fish_age_obs = fish_age_obs,
+             fish_age_ind = fish_age_ind,
+             fish_age_iss = fish_age_iss,
+             fish_age_wt = 0.5,
+             srv_age_obs = srv_age_obs,
+             srv_age_ind = srv_age_ind,
+             srv_age_iss = srv_age_iss,
+             srv_age_wt = 0.5,
+             fish_size_obs = fish_size_obs,
+             fish_size_ind = fish_size_ind,
+             fish_size_iss = fish_size_iss,
+             fish_size_wt = 0.5,
+             age_error = age_error,
+             size_age = size_age,
+             wt_fmort_reg = 0.1,
+             mean_M = 0.06,
+             sd_M = 0.05,
+             mean_q = 1,
+             sd_q = 0.45,
+             mean_sigmaR = 1.5,
+             sd_sigmaR = 0.01,
+             yield_ratio = yield_ratio)
+
+# run base using orig input values 
+pars3 <- list(log_M = log(0.0595),
+              log_a50C = log(7.5),
+              deltaC = 3,
+              log_a50S = log(7.3),
+              deltaS = 3.8,
+              log_q = 0,
+              log_mean_R = 4.3,
+              init_log_Rt = rep(0, 48),
+              log_Rt = rep(0, length(years)),
+              log_mean_F = 0,
+              log_Ft =  rep(0, length(years)),
+              log_F35 = 0,
+              log_F40 = 0,
+              log_F50 = 0,
+              sigmaR = 1.5)
+
+obj_3 <- RTMB::MakeADFun(f, 
+                         pars3, 
+                         map = list(sigmaR = factor(NA)))  
+
+lower = c(log(0.05), log(3), .5, log(3), 0.5, log(0.2), -10, rep(-10, length(pars3$init_log_Rt)), 
+          rep(-10, length(pars3$log_Rt)), -10, rep(-10, length(years)), rep(-10,3))
+upper = c(log(0.15), log(12), 5.5, log(12), 5.5, log(1.2), 10, rep(10, length(pars3$init_log_Rt)), 
+          rep(10, length(pars3$log_Rt)), 10, rep(10, length(years)), rep(10,3))
+
+fit_3 <- nlminb(obj_3$par,
+                obj_3$fn,
+                obj_3$gr,
+                control = list(iter.max=100000,
+                               eval.max=20000),
+                lower = lower,
+                upper = upper)
+
+sd_3 = RTMB::sdreport(obj_3)
+# similar results as previous run
+report_3 <- obj_3$report(obj_3$env$last.par.best)
+proj_bio(report_2)
+proj_bio(report_3)
+
+# compare to admb model
+plot(years, report_3$Nat[1,], type ='l')
+plot(years, report_3$spawn_bio, type ='l')
+plot(years, report_3$tot_bio, type ='l')
+plot(years, bio$tot_biom, ylim = c(30000, 200000))
+lines(years, report_1$tot_bio)
+lines(years, report_2$tot_bio, col=3)
+
+plot(years, bio$F, ylim = c(0, 0.4))
+lines(years, (report_1$Ft * max(report_1$slx[,1])))
+lines(years, (report_2$Ft * max(report_2$slx[,1])), col = 3)
+
+report_og$M
+report_1$M
+report_2$M
+report_3$M
+
+report_og$q
+report_1$q
+report_2$q
+report_3$q
+# q is quite low, tighten up the prior
+
+data <- list(ages = ages,
+             years = years,
+             length_bins = 15:45,
+             waa = waa,
+             wt_mature = maa * waa / 2,
+             spawn_mo = 5,
+             catch_obs = catch_obs,
+             catch_wt = rep(50, length(years)),
+             srv_obs = srv_obs,
+             srv_ind = srv_ind,
+             srv_sd = srv_sd,
+             srv_wt = 0.25,
+             fish_age_obs = fish_age_obs,
+             fish_age_ind = fish_age_ind,
+             fish_age_iss = fish_age_iss,
+             fish_age_wt = 0.5,
+             srv_age_obs = srv_age_obs,
+             srv_age_ind = srv_age_ind,
+             srv_age_iss = srv_age_iss,
+             srv_age_wt = 0.5,
+             fish_size_obs = fish_size_obs,
+             fish_size_ind = fish_size_ind,
+             fish_size_iss = fish_size_iss,
+             fish_size_wt = 0.5,
+             age_error = age_error,
+             size_age = size_age,
+             wt_fmort_reg = 0.1,
+             mean_M = 0.06,
+             sd_M = 0.05,
+             mean_q = 1,
+             sd_q = 0.15,
+             mean_sigmaR = 1.5,
+             sd_sigmaR = 0.01,
+             yield_ratio = yield_ratio)
+
+
+obj_3 <- RTMB::MakeADFun(f, 
+                         pars3, 
+                         map = list(sigmaR = factor(NA)))  
+
+fit_3 <- nlminb(obj_3$par,
+                obj_3$fn,
+                obj_3$gr,
+                control = list(iter.max=100000,
+                               eval.max=20000),
+                lower = lower,
+                upper = upper)
+
+sd_3 = RTMB::sdreport(obj_3)
+# similar results as previous run
+report_3 <- obj_3$report(obj_3$env$last.par.best)
+proj_bio(report_og)
+proj_bio(report_2)
+proj_bio(report_3)
+
+report_2$q
+report_3$q
+
+report_2$M
+report_3$M
+
+report_og$B40
+report_2$B40
+report_3$B40
+
+report_1$Nat - report_2$Nat
+report_1$spawn_bio - report_2$spawn_bio
+report_1$tot_bio - report_2$tot_bio
+report_1$Ft - report_2$Ft
+
+
+plot(1961:2022, report_og$Nat[1,], ylim = c(0,67), type = 'l', col='blue')
+lines(1961:2022, report_2$Nat[1,], ylim = c(0,67), type = 'l', col='darkgray')
+lines(years, report_3$Nat[1,])
+
+plot(1961:2022, report_2$spawn_bio, ylim = c(10000, 85000), type = 'l', col='darkgray')
+lines(years, report_3$spawn_bio)
+
+plot(1961:2022, report_2$tot_bio, ylim = c(10000, 210000), type = 'l', col='darkgray')
+lines(years, report_3$tot_bio)
+
+plot(srv_yrs, report_2$srv_pred, type = 'l', ylim = c(60000, 150000), col='darkgray')
+lines(srv_yrs, report_3$srv_pred)
+
+plot(1961:2022, (report_2$Ft * max(report_1$slx[,1])), type = 'l', col='darkgray')
+lines(years, (report_3$Ft * max(report_1$slx[,1])))
+
 # mcmc ----
-mcmc <- tmbstan(obj_2, chains=1, iter=4000)
+# not gonna work out with this limited number of chaines
+mcmc <- tmbstan(obj_3, chains=1, iter=4000)
 post <- as.matrix(mcmc)
-sims <- proj_bio(report_2, obj_2, post, reps=nrow(post))
+# don't run unless you have some time on your hands...
+sims <- proj_bio(report_3, obj_3, post, reps=nrow(post))
 
 ggplot(sims, aes(year, value, color = id, group = id)) +
   stat_summary(fun.y=mean, geom='line') +
   stat_summary(fun.data = mean_cl_boot, geom = "ribbon", alpha = 0.2, color = NA) +
   expand_limits(y = 0) +
-  geom_hline(yintercept = c(report_2$B35, report_2$B40))
+  geom_hline(yintercept = c(report_3$B35, report_3$B40))
 
+sb = get_bio(post, obj_3, reps = nrow(post))
+post$spawn_bio
+obj_3$report(post[2000,-ncol(post)])$spawn_bio
+sb %>% 
+  as.data.frame() %>% 
+  mutate(year = report_3$years) %>% 
+  tidyr::pivot_longer(-year) %>% 
+  mutate(sim = as.numeric(gsub("V", "", name)),
+         id = 'spawn_bio') %>% 
+  dplyr::select(-name) %>% 
+  bind_rows(sims) %>%
+  dplyr::filter(id=='spawn_bio') %>% 
+  ggplot(aes(year, value)) +
+  stat_summary(fun.y=mean, geom='line') +
+  stat_summary(fun.data = mean_cl_normal, geom = "ribbon", alpha = 0.2, color = NA)+
+  expand_limits(y = 0) +
+  geom_hline(yintercept = c(report_3$B35, report_3$B40))
+
+# Choose parameter values to profile
+par_names <- c("log_a50C", "log_a50S")  # Replace with your parameter names
+par_ranges <- list(
+  log_a50C = seq(-3, 3, length.out=50),  # Replace with appropriate range
+  log_a50S = seq(-3, 3, length.out=50)   # Replace with appropriate range
+)
+
+# Profile the likelihood
+profile_results <- multi_likelihood(par_names, par_ranges, obj_3, fit_3)
+ggplot(profile_results, aes(log_a50C, log_a50S)) +
+  geom_tile(aes(fill = log_like)) +
+  stat_contour(aes(z = log_like)) +
+  scico::scale_fill_scico(direction = -1, palette = 'oslo')
+scale_fill_brewer(
+  type = "seq",
+  palette = "blues",
+  direction = -1,
+)
+
+par_name = 'log_a50C'
+par_values = seq(0, 3, length.out = 50)
+par_like = single_likelihood(par_name, par_values, obj_3, fit_3)
+# Plot the profile
+plot(par_values, par_like, type="l", xlab=par_name, ylab="Log-Likelihood")
+
+par_name = 'log_a50S'
+par_values = seq(0, 3, length.out = 50)
+par_like = single_likelihood(par_name, par_values, obj_3, fit_3)
+# Plot the profile
+plot(par_values, par_like, type="l", xlab=par_name, ylab="Log-Likelihood")
+
+par_name = 'log_mean_R'
+par_values = seq(2.2, 2.6, length.out = 50)
+par_like = single_likelihood(par_name, par_values, obj_3, fit_3)
+# Plot the profile
+plot(par_values, par_like, type="l", xlab=par_name, ylab="Log-Likelihood")
