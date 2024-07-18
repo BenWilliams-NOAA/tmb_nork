@@ -128,6 +128,7 @@ report_og <- obj_og$report(obj_og$env$last.par.best)
 proj_bio(report_og)
 
 # compare to admb model
+# look at the .rep file for more values for comparison
 plot(years, bio$recruits)
 lines(years, report_og$Nat[1,])
 
@@ -138,7 +139,8 @@ plot(years, bio$F)
 lines(years, (report_og$Ft * max(report_og$slx[,1])))
 
 report_og$B40
-
+report_og$B35
+b40
 
 # run base model using output as start values, but with bounds
 # sigmaR is not estimated in the GOA northern rockfish model
@@ -248,3 +250,15 @@ report_1$Nat - report_2$Nat
 report_1$spawn_bio - report_2$spawn_bio
 report_1$tot_bio - report_2$tot_bio
 report_1$Ft - report_2$Ft
+
+# mcmc ----
+mcmc <- tmbstan(obj_2, chains=1, iter=4000)
+post <- as.matrix(mcmc)
+sims <- proj_bio(report_2, obj_2, post, reps=nrow(post))
+
+ggplot(sims, aes(year, value, color = id, group = id)) +
+  stat_summary(fun.y=mean, geom='line') +
+  stat_summary(fun.data = mean_cl_boot, geom = "ribbon", alpha = 0.2, color = NA) +
+  expand_limits(y = 0) +
+  geom_hline(yintercept = c(report_2$B35, report_2$B40))
+
