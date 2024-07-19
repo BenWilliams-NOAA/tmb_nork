@@ -51,12 +51,13 @@ data <- list(ages = ages,
              size_age = size_age,
              wt_fmort_reg = 0.1,
              wt_rec_var = 1,
+             f_regularity = 0.1,
              mean_M = 0.06,
-             sd_M = 0.05,
+             cv_M = 0.05,
              mean_q = 1,
-             sd_q = 0.45,
+             cv_q = 0.45,
              mean_sigmaR = 1.5,
-             sd_sigmaR = 0.01,
+             cv_sigmaR = 0.01,
              yield_ratio = yield_ratio)
 # parameters ----------------
 pars <- list(log_M = log(0.05949983),
@@ -126,7 +127,7 @@ obj_og <- RTMB::MakeADFun(f,
                           pars, 
                           map = map)      
 report_og <- obj_og$report(obj_og$env$last.par.best)
-proj_bio(report_og)
+proj_og = proj_bio(report_og)
 
 # compare to admb model
 # look at the .rep file for more values for comparison
@@ -147,11 +148,12 @@ b40
 # sigmaR is not estimated in the GOA northern rockfish model
 obj_1 <- RTMB::MakeADFun(f, 
                          pars, 
-                         map = list(sigmaR = factor(NA)))  
+                         map = list(log_M = factor(NA),
+                                    sigmaR = factor(NA)))  
 length(obj_1$par)
 names(obj_1$par)
-lower = c(log(0.05), log(3), .5, log(3), 0.5, log(0.2), -10, rep(-10, length(pars$init_log_Rt)), 
-          rep(-10, length(pars$log_Rt)), -10, rep(-10, length(years)), rep(-10,3))
+lower = c(log(0.05), log(3), .5, log(3), 0.5, log(0.2), -10, rep(-30, length(pars$init_log_Rt)), 
+          rep(-20, length(pars$log_Rt)), -20, rep(-30, length(years)), rep(-30,3))
 upper = c(log(0.15), log(12), 5.5, log(12), 5.5, log(1.2), 10, rep(10, length(pars$init_log_Rt)), 
           rep(10, length(pars$log_Rt)), 10, rep(10, length(years)), rep(10,3))
 
@@ -186,6 +188,10 @@ lines(years, (report_1$Ft * max(report_1$slx[,1])))
 
 report_og$B40
 report_1$B40
+
+report_1$M
+report_1$q
+
 
 
 # run base using orig input values 
@@ -329,7 +335,7 @@ pars3 <- list(log_M = log(0.0595),
               log_F50 = 0,
               sigmaR = 1.5)
 
-obj_3 <- RTMB::MakeADFun(f1, 
+obj_3 <- RTMB::MakeADFun(f, 
                          pars3, 
                          map = list(sigmaR = factor(NA)))  
 
@@ -356,9 +362,8 @@ proj_bio(report_3)
 plot(years, report_3$Nat[1,], type ='l')
 plot(years, report_3$spawn_bio, type ='l')
 plot(years, report_3$tot_bio, type ='l')
-plot(years, bio$tot_biom, ylim = c(30000, 200000))
+lines(1961:2022, bio$tot_biom, ylim = c(30000, 200000))
 lines(1961:2022, report_1$tot_bio)
-lines(1961:2022,, report_2$tot_bio, col=3)
 
 plot(1961:2022, bio$F, ylim = c(0, 0.4))
 lines(1961:2022, (report_1$Ft * max(report_1$slx[,1])))
