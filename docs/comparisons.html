@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>comparisons</title>
+<title>Northern Rockfish - 4&nbsp; Model comparisons</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -58,11 +58,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
 <script src="site_libs/clipboard/clipboard.min.js"></script>
 <script src="site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./summary.html" rel="next">
+<link href="./model_run.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -96,23 +99,125 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body>
+<body class="nav-sidebar floating">
 
 <div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./comparisons.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Model comparisons</span></a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Northern Rockfish</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Summary</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./intro.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Model and utilities</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./model_run.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Running a model</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./comparisons.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Model comparisons</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./summary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Summary</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
-    <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="comparisons.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></div>
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#selectivity" id="toc-selectivity" class="nav-link active" data-scroll-target="#selectivity"><span class="header-section-number">4.1</span> Selectivity</a></li>
+  <li><a href="#biomass" id="toc-biomass" class="nav-link" data-scroll-target="#biomass"><span class="header-section-number">4.2</span> Biomass</a></li>
+  <li><a href="#comps" id="toc-comps" class="nav-link" data-scroll-target="#comps"><span class="header-section-number">4.3</span> Comps</a>
+  <ul class="collapse">
+  <li><a href="#fishery-age-compositions" id="toc-fishery-age-compositions" class="nav-link" data-scroll-target="#fishery-age-compositions"><span class="header-section-number">4.3.1</span> Fishery age compositions</a></li>
+  <li><a href="#survey-age-compositions" id="toc-survey-age-compositions" class="nav-link" data-scroll-target="#survey-age-compositions"><span class="header-section-number">4.3.2</span> Survey age compositions</a></li>
+  <li><a href="#fishery-size-compositions" id="toc-fishery-size-compositions" class="nav-link" data-scroll-target="#fishery-size-compositions"><span class="header-section-number">4.3.3</span> Fishery size compositions</a></li>
+  <li><a href="#fs" id="toc-fs" class="nav-link" data-scroll-target="#fs"><span class="header-section-number">4.3.4</span> F’s</a></li>
+  </ul></li>
+  <li><a href="#bs" id="toc-bs" class="nav-link" data-scroll-target="#bs"><span class="header-section-number">4.4</span> B’s</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Model comparisons</span></h1>
+</div>
 
 
-<section id="model-comparisons" class="level1">
-<h1>Model comparisons</h1>
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -140,8 +245,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(afscassess<span class="sc">::</span><span class="fu">theme_report</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<section id="selectivity" class="level2">
-<h2 class="anchored" data-anchor-id="selectivity">Selectivity</h2>
+<section id="selectivity" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="selectivity"><span class="header-section-number">4.1</span> Selectivity</h2>
 <ul>
 <li>No discernible differences in selectivity observed.</li>
 </ul>
@@ -177,8 +282,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="biomass" class="level2">
-<h2 class="anchored" data-anchor-id="biomass">Biomass</h2>
+<section id="biomass" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="biomass"><span class="header-section-number">4.2</span> Biomass</h2>
 <ul>
 <li>No discernible differences in biomass observed.</li>
 </ul>
@@ -214,10 +319,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="comps" class="level2">
-<h2 class="anchored" data-anchor-id="comps">Comps</h2>
-<section id="fishery-age-compositions" class="level3">
-<h3 class="anchored" data-anchor-id="fishery-age-compositions">Fishery age compositions</h3>
+<section id="comps" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="comps"><span class="header-section-number">4.3</span> Comps</h2>
+<section id="fishery-age-compositions" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="fishery-age-compositions"><span class="header-section-number">4.3.1</span> Fishery age compositions</h3>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -258,8 +363,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="survey-age-compositions" class="level3">
-<h3 class="anchored" data-anchor-id="survey-age-compositions">Survey age compositions</h3>
+<section id="survey-age-compositions" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="survey-age-compositions"><span class="header-section-number">4.3.2</span> Survey age compositions</h3>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -300,8 +405,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="fishery-size-compositions" class="level3">
-<h3 class="anchored" data-anchor-id="fishery-size-compositions">Fishery size compositions</h3>
+<section id="fishery-size-compositions" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="fishery-size-compositions"><span class="header-section-number">4.3.3</span> Fishery size compositions</h3>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -342,8 +447,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="fs" class="level3">
-<h3 class="anchored" data-anchor-id="fs">F’s</h3>
+<section id="fs" class="level3" data-number="4.3.4">
+<h3 data-number="4.3.4" class="anchored" data-anchor-id="fs"><span class="header-section-number">4.3.4</span> F’s</h3>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -380,8 +485,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="bs" class="level2">
-<h2 class="anchored" data-anchor-id="bs">B’s</h2>
+<section id="bs" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="bs"><span class="header-section-number">4.4</span> B’s</h2>
 <p><code>ADMB</code> output:</p>
 <div class="cell">
 <details>
@@ -448,7 +553,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- $$ -->
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -685,6 +789,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./model_run.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Running a model</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./summary.html" class="pagination-link">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Summary</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 
 
