@@ -37,10 +37,16 @@ f <- function(pars) {
   N_spr = sb_spr = matrix(1, A, 4)
   
   # priors -----------------
-  nll_M = nll_q = nll_sigmaR = 0.0
-  nll_M = dnorm(M, mean_M, sd_M, TRUE)
-  nll_q = dnorm(q, mean_q, sd_q, TRUE)
-  nll_sigmaR = dnorm(sigmaR, mean_sigmaR, sd_sigmaR, TRUE)
+  # prefer using dnorm but want to match admb exactly
+  # won't affect nll location, but values will be slightly different
+  # admb priors do not include a constant that is in dnorm
+  # nll_M = dnorm(M, mean_M, cv_M, TRUE)
+  # nll_q = dnorm(q, mean_q, cv_q, TRUE)
+  # nll_sigmaR = dnorm(sigmaR, mean_sigmaR, cv_sigmaR, TRUE)
+  
+  nll_M = (log_M - log(mean_M))^2 / (2 * cv_M^2)
+  nll_q = (log_q - log(mean_q))^2 / (2 * cv_q^2)
+  nll_sigmaR= (log(sigmaR / mean_sigmaR))^2 / (2 * cv_sigmaR^2)
   
   # analysis ----------
   # selectivity
