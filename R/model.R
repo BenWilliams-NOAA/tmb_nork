@@ -50,8 +50,9 @@ f <- function(pars) {
   
   # analysis ----------
   # selectivity
+  adj = ifelse(ages[1]<=1, 1, ages[1]-1)
   sel <- function(a, a50, delta) {
-    1. / (1. + exp(-2.944438979 * ((a+1) - a50) / delta))
+    1. / (1. + exp(-2.944438979 * ((a+adj) - a50) / delta))
   }
   
   for(a in 1:A) {
@@ -361,10 +362,10 @@ f1 <- function(pars) {
   
   # analysis ----------
   # selectivity
+  adj = ifelse(ages[1]<=1, 1, ages[1]-1)
   sel <- function(a, a50, delta) {
-    1. / (1. + exp(-2.944438979 * ((a+1) - a50) / delta))
+    1. / (1. + exp(-2.944438979 * ((a+adj) - a50) / delta))
   }
-  
   for(a in 1:A) {
     slx[a,1] = sel(a, a50C, deltaC)
     slx[a,2] = sel(a, a50S, deltaS)
