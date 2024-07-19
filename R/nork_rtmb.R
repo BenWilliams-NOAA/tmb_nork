@@ -50,6 +50,7 @@ data <- list(ages = ages,
              age_error = age_error,
              size_age = size_age,
              wt_fmort_reg = 0.1,
+             wt_rec_var = 1,
              mean_M = 0.06,
              sd_M = 0.05,
              mean_q = 1,
@@ -299,6 +300,14 @@ data <- list(ages = ages,
              sd_M = 0.05,
              mean_q = 1,
              sd_q = 0.45,
+             mean_a50C = log(8),
+             sd_a50C = 0.25,
+             mean_deltaC = 3,
+             sd_deltaC = 1,
+             mean_a50S = log(8),
+             sd_a50S = 0.25,
+             mean_deltaS = 3,
+             sd_deltaS = 1,
              mean_sigmaR = 1.5,
              sd_sigmaR = 0.01,
              yield_ratio = yield_ratio)
@@ -320,14 +329,14 @@ pars3 <- list(log_M = log(0.0595),
               log_F50 = 0,
               sigmaR = 1.5)
 
-obj_3 <- RTMB::MakeADFun(f, 
+obj_3 <- RTMB::MakeADFun(f1, 
                          pars3, 
                          map = list(sigmaR = factor(NA)))  
 
-lower = c(log(0.05), log(3), .5, log(3), 0.5, log(0.2), -10, rep(-10, length(pars3$init_log_Rt)), 
-          rep(-10, length(pars3$log_Rt)), -10, rep(-10, length(years)), rep(-10,3))
-upper = c(log(0.15), log(12), 5.5, log(12), 5.5, log(1.2), 10, rep(10, length(pars3$init_log_Rt)), 
-          rep(10, length(pars3$log_Rt)), 10, rep(10, length(years)), rep(10,3))
+lower = c(log(0.05), log(3), .5, log(3), 0.5, log(0.2), -15, rep(-15, length(pars3$init_log_Rt)), 
+          rep(-15, length(pars3$log_Rt)), -15, rep(-15, length(years)), rep(-15,3))
+upper = c(log(0.15), log(12), 5.5, log(12), 5.5, log(1.2), 10, rep(15, length(pars3$init_log_Rt)), 
+          rep(15, length(pars3$log_Rt)), 10, rep(10, length(years)), rep(10,3))
 
 fit_3 <- nlminb(obj_3$par,
                 obj_3$fn,
@@ -348,12 +357,12 @@ plot(years, report_3$Nat[1,], type ='l')
 plot(years, report_3$spawn_bio, type ='l')
 plot(years, report_3$tot_bio, type ='l')
 plot(years, bio$tot_biom, ylim = c(30000, 200000))
-lines(years, report_1$tot_bio)
-lines(years, report_2$tot_bio, col=3)
+lines(1961:2022, report_1$tot_bio)
+lines(1961:2022,, report_2$tot_bio, col=3)
 
-plot(years, bio$F, ylim = c(0, 0.4))
-lines(years, (report_1$Ft * max(report_1$slx[,1])))
-lines(years, (report_2$Ft * max(report_2$slx[,1])), col = 3)
+plot(1961:2022, bio$F, ylim = c(0, 0.4))
+lines(1961:2022, (report_1$Ft * max(report_1$slx[,1])))
+lines(years, (report_3$Ft * max(report_3$slx[,1])), col = 3)
 
 report_og$M
 report_1$M
@@ -431,11 +440,13 @@ report_og$B40
 report_2$B40
 report_3$B40
 
-report_1$Nat - report_2$Nat
-report_1$spawn_bio - report_2$spawn_bio
-report_1$tot_bio - report_2$tot_bio
-report_1$Ft - report_2$Ft
+report_og$a50C
+report_2$a50C
+report_3$a50C
 
+report_og$a50S
+report_2$a50S
+report_3$a50S
 
 plot(1961:2022, report_og$Nat[1,], ylim = c(0,67), type = 'l', col='blue')
 lines(1961:2022, report_2$Nat[1,], ylim = c(0,67), type = 'l', col='darkgray')
@@ -504,7 +515,7 @@ scale_fill_brewer(
 )
 
 par_name = 'log_a50C'
-par_values = seq(0, 3, length.out = 50)
+par_values = seq(-3, 3, length.out = 50)
 par_like = single_likelihood(par_name, par_values, obj_3, fit_3)
 # Plot the profile
 plot(par_values, par_like, type="l", xlab=par_name, ylab="Log-Likelihood")
