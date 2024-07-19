@@ -49,7 +49,7 @@ f <- function(pars) {
   nll_sigmaR= (log(sigmaR / mean_sigmaR))^2 / (2 * cv_sigmaR^2)
   
   # analysis ----------
-  # selectivity
+  ## selectivity ----
   adj = ifelse(ages[1]<=1, 1, ages[1]-1)
   sel <- function(a, a50, delta) {
     1. / (1. + exp(-2.944438979 * ((a+adj) - a50) / delta))
@@ -60,7 +60,7 @@ f <- function(pars) {
     slx[a,2] = sel(a, a50S, deltaS)
   }
   
-  # mortality
+  ## mortality ----
   Ft = exp(log_mean_F + log_Ft)
   for(t in 1:T){
     for(a in 1:A) {
@@ -69,7 +69,7 @@ f <- function(pars) {
       Sat[a,t] = exp(-Zat[a,t])
     }
   }
-  # population ----
+  ## population ----
   ## Bzero
   # initNat[1] = exp(log_mean_R)
   # for (a in 2:A) {
@@ -78,7 +78,7 @@ f <- function(pars) {
   # initNat[A] <- initNat[A] / (1 - exp(-M))
   # Bzero = sum(initNat * wt_mature * spawn_adj)
   
-  ## numbers at age
+  ## Nat ----
   # populate first row
   # need to use correct log_Rt to match ADMB model
   for(t in 1:T) {
@@ -97,7 +97,7 @@ f <- function(pars) {
     Nat[A,t] = Nat[A,t] + Nat[A,t-1] * Sat[A,t-1]
   }
   
-  #     # spawn_bio
+  ## spawn_bio ----
   for(t in 1:T) {
     spawn_bio[t] = sum(Nat[,t] * wt_mature)
     tot_bio[t] = sum(Nat[,t] * waa)
@@ -106,7 +106,7 @@ f <- function(pars) {
   # spawn_bio[T] = sum(Nat[,T] * spawn_adj * wt_mature)
   
   
-  # catch
+  ## catch ----
   for(t in 1:T){
     for(a in 1:A){
       Cat[a,t] = Fat[a,t] / Zat[a,t] * Nat[a,t] * (1.0 - Sat[a,t])
@@ -114,7 +114,7 @@ f <- function(pars) {
     catch_pred[t] = sum(Cat[,t] * waa)
   }
   
-  # survey biomass ----
+  ## survey biomass ----
   isrv = 1
   srv_like = 0.0
   # survey biomass & likelihood
@@ -131,7 +131,7 @@ f <- function(pars) {
     }
   }
   
-  # fishery age comp
+  ## fishery age comp ----
   icomp = 1
   for(t in 1:T) {
     if(fish_age_ind[t] == 1) {
@@ -141,7 +141,7 @@ f <- function(pars) {
     }
   }
   
-  # survey age comp
+  ## survey age comp ----
   icomp = 1
   for(t in 1:T) {
     if(srv_age_ind[t] == 1) {
@@ -150,7 +150,7 @@ f <- function(pars) {
     }
   }
   
-  # fishery size comp
+  ## fishery size comp ----
   icomp = 1
   for(t in 1:T) {
     if(fish_size_ind[t] == 1) {
@@ -312,6 +312,7 @@ f <- function(pars) {
   # nll = 0.0
   return(nll)
 }
+
 f1 <- function(pars) {
   require(RTMB)
   RTMB::getAll(pars, data)
@@ -361,7 +362,7 @@ f1 <- function(pars) {
   nll_sigmaR = dnorm(sigmaR, mean_sigmaR, sd_sigmaR, TRUE)
   
   # analysis ----------
-  # selectivity
+  ## selectivity ----
   adj = ifelse(ages[1]<=1, 1, ages[1]-1)
   sel <- function(a, a50, delta) {
     1. / (1. + exp(-2.944438979 * ((a+adj) - a50) / delta))
@@ -371,7 +372,7 @@ f1 <- function(pars) {
     slx[a,2] = sel(a, a50S, deltaS)
   }
   
-  # mortality
+  ## mortality ----
   Ft = exp(log_mean_F + log_Ft)
   for(t in 1:T){
     for(a in 1:A) {
@@ -380,7 +381,7 @@ f1 <- function(pars) {
       Sat[a,t] = exp(-Zat[a,t])
     }
   }
-  # population ----
+  ## population ----
   ## Bzero
   # initNat[1] = exp(log_mean_R)
   # for (a in 2:A) {
@@ -408,7 +409,7 @@ f1 <- function(pars) {
     Nat[A,t] = Nat[A,t] + Nat[A,t-1] * Sat[A,t-1]
   }
   
-  #     # spawn_bio
+  ## spawn_bio ----
   for(t in 1:T) {
     spawn_bio[t] = sum(Nat[,t] * wt_mature)
     tot_bio[t] = sum(Nat[,t] * waa)
@@ -417,7 +418,7 @@ f1 <- function(pars) {
   # spawn_bio[T] = sum(Nat[,T] * spawn_adj * wt_mature)
   
   
-  # catch
+  ## catch ----
   for(t in 1:T){
     for(a in 1:A){
       Cat[a,t] = Fat[a,t] / Zat[a,t] * Nat[a,t] * (1.0 - Sat[a,t])
@@ -425,7 +426,7 @@ f1 <- function(pars) {
     catch_pred[t] = sum(Cat[,t] * waa)
   }
   
-  # survey biomass ----
+  ## survey biomass ----
   isrv = 1
   srv_like = 0.0
   # survey biomass & likelihood
@@ -442,7 +443,7 @@ f1 <- function(pars) {
     }
   }
   
-  # fishery age comp
+  ## fishery age comp ----
   icomp = 1
   for(t in 1:T) {
     if(fish_age_ind[t] == 1) {
@@ -452,7 +453,7 @@ f1 <- function(pars) {
     }
   }
   
-  # survey age comp
+  ## survey age comp ----
   icomp = 1
   for(t in 1:T) {
     if(srv_age_ind[t] == 1) {
@@ -461,7 +462,7 @@ f1 <- function(pars) {
     }
   }
   
-  # fishery size comp
+  ## fishery size comp ----
   icomp = 1
   for(t in 1:T) {
     if(fish_size_ind[t] == 1) {
