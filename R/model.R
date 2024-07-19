@@ -234,7 +234,7 @@ f <- function(pars) {
   like_srv_age = srv_age_lk * srv_age_wt
   like_fish_size = fish_size_lk * fish_size_wt
   # like_rec = sum(log_Rt^2) / (2 * sigmaR^2) + (length(log_Rt) * log(sigmaR))
-  like_rec = sum((log_Rt + sigmaR * sigmaR / 2)^2) / (2 * sigmaR^2)
+  like_rec = sum((c(log_Rt , init_log_Rt) + sigmaR * sigmaR / 2)^2) / (2 * sigmaR^2)
   f_regularity = wt_fmort_reg * sum(log_Ft^2)
   
   nll = 0.0
