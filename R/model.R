@@ -22,7 +22,7 @@ f <- function(pars) {
   F50 = exp(log_F50)
   F40 = exp(log_F40)
   F35 = exp(log_F35)
-  f_regularity = 0.1
+  
   
   # containers ---------
   slx = matrix(NA, A, 2)
