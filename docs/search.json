@@ -2,9 +2,9 @@
   {
     "objectID": "intro.html",
     "href": "intro.html",
-    "title": "Introduction",
+    "title": "1  Introduction",
     "section": "",
-    "text": "Introduction\nBridging the Gulf of Alaska northern rockfish model from ADMB to RTMB. The ADMB program is in the process of an ‘orderly shutdown of development’ (see: ADMB) and TMB is a viable alternative for fishery stock assesment development. RTMB allows for using the native R interface to TMB (Template Model Builder) so models can be written entirely in R rather than C++ (Kristensen 2024).\nTo compare model outputs last full model accepted by the SSC for northern rockfish ADMB model 22.1 was evaluated. The ADMB code was transferred to RTMB code. Then the model was run using the parameter outputs from the ADMB model, direct differences between model outputs and percent difference of key components are presented.\nAll associated code is available\n\n\n\n\nKristensen, Kasper. 2024. RTMB: ’R’ Bindings for ’TMB’. https://github.com/kaskr/rtmb."
+    "text": "Bridging the Gulf of Alaska northern rockfish model from ADMB to RTMB. The ADMB program is in the process of an ‘orderly shutdown of development’ (see: ADMB) and TMB is a viable alternative for fishery stock assesment development. RTMB allows for using the native R interface to TMB (Template Model Builder) so models can be written entirely in R rather than C++ (Kristensen 2024).\nTo compare model outputs last full model accepted by the SSC for northern rockfish ADMB model 22.1 was evaluated. The ADMB code was transferred to RTMB code. Then the model was run using the parameter outputs from the ADMB model, direct differences between model outputs and percent difference of key components are presented.\nAll associated code is available\n\n\n\n\nKristensen, Kasper. 2024. RTMB: ’R’ Bindings for ’TMB’. https://github.com/kaskr/rtmb."
   },
   {
     "objectID": "summary.html",
@@ -68,5 +68,12 @@
     "title": "References",
     "section": "",
     "text": "References"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Northern Rockfish",
+    "section": "",
+    "text": "Summary\nThis document describes transferring the Gulf of Alaska northern rockfish assessment from ADMB to RTMB. TMB/RTMB is widely seen as the successor to ADMB which is undergoing an orderly shutdown of development. As specified within the provided code the RTMB model appears to accurately reproduce the ADMB model."
   }
 ]
